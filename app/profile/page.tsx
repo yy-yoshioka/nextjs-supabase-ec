@@ -6,6 +6,7 @@ import { getCurrentUser, signOut } from "../(lib)/auth";
 import { getCurrentUserProfile } from "../(lib)/profiles";
 import { UserProfile } from "../(lib)/types/database";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -79,6 +80,39 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
+
+          {/* Avatar Section */}
+          <div className="flex justify-center py-6 border-b border-gray-200">
+            <div className="relative w-32 h-32 rounded-full overflow-hidden">
+              {profile?.avatar_url ? (
+                <Image
+                  src={profile.avatar_url}
+                  alt="Profile avatar"
+                  width={128}
+                  height={128}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-16 w-16 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="border-t border-gray-200">
             <dl>
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

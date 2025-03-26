@@ -147,7 +147,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
     - In the Supabase dashboard, enable "Email and Password" sign-ups under the Authentication settings.
     - Optionally, update the `users` table with a default role ('user').
 
-- [ ] **Step 5: User Profile Creation & Editing**
+- [x] **Step 5: User Profile Creation & Editing**
   - **Task**: Automatically create a default user profile upon sign-up and implement pages for viewing and editing the user profile.
   - **Files**:
     - `app/(lib)/profiles.ts`: Functions to fetch and upsert user profile data.

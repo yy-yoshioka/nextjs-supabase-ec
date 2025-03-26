@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "../../(lib)/auth";
-import { getCurrentUserProfile, updateUserProfile } from "../../(lib)/profiles";
+import {
+  getCurrentUserProfile,
+  updateUserProfile,
+  uploadAvatar,
+} from "../../(lib)/profiles";
 import { UserProfile } from "../../(lib)/types/database";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function EditProfilePage() {
   const [profile, setProfile] = useState<Partial<UserProfile>>({
@@ -13,12 +18,15 @@ export default function EditProfilePage() {
     bio: "",
     address: "",
     phone_number: "",
+    avatar_url: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -38,6 +46,7 @@ export default function EditProfilePage() {
             bio: userProfile.bio || "",
             address: userProfile.address || "",
             phone_number: userProfile.phone_number || "",
+            avatar_url: userProfile.avatar_url || "",
           });
         }
       } catch (error) {
@@ -74,6 +83,50 @@ export default function EditProfilePage() {
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    // Trigger file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !userId) {
+      return;
+    }
+
+    const file = e.target.files[0];
+    const fileSize = file.size / 1024 / 1024; // in MB
+
+    if (fileSize > 2) {
+      setError("File size exceeds 2MB. Please choose a smaller file.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError(null);
+
+      const avatarUrl = await uploadAvatar(userId, file);
+
+      setProfile((prev) => ({
+        ...prev,
+        avatar_url: avatarUrl,
+      }));
+
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An error occurred while uploading the avatar");
+      }
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -130,6 +183,57 @@ export default function EditProfilePage() {
           className="bg-white shadow overflow-hidden sm:rounded-lg p-6"
         >
           <div className="grid grid-cols-1 gap-6">
+            {/* Avatar Upload Section */}
+            <div className="flex flex-col items-center mb-4">
+              <div
+                onClick={handleAvatarClick}
+                className="relative w-24 h-24 rounded-full overflow-hidden cursor-pointer border-2 border-gray-300 hover:border-indigo-500 transition-colors"
+              >
+                {profile.avatar_url ? (
+                  <Image
+                    src={profile.avatar_url}
+                    alt="Profile avatar"
+                    width={96}
+                    height={96}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                )}
+
+                {uploading && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                  </div>
+                )}
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <p className="mt-2 text-sm text-gray-600">
+                Click to upload avatar
+              </p>
+            </div>
+
             <div>
               <label
                 htmlFor="display_name"
