@@ -137,7 +137,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
 
 ## Auth & Roles, Extended User Profile
 
-- [ ] **Step 4: Supabase Auth Setup**
+- [x] **Step 4: Supabase Auth Setup**
   - **Task**: Enable email/password sign-ups using Supabase Auth. Ensure that new users are created in the `users` table, and link to `user_profiles` for extended info.
   - **Files**:
     - `app/(lib)/auth.ts`: Implement functions for sign-up, sign-in, and sign-out.
