@@ -46,6 +46,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // カートの変更をlocalStorageに保存
   useEffect(() => {
+    // カートが空の場合に空の配列を無駄に保存しないようにする
+    if (items.length === 0 && !localStorage.getItem(CART_STORAGE_KEY)) {
+      return;
+    }
+
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (error) {

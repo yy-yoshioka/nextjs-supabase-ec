@@ -212,7 +212,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
       ```
     - Configure your Stripe account in test mode.
 
-- [ ] **Step 10: Stripe Webhook & Order Creation**
+- [x] **Step 10: Stripe Webhook & Order Creation**
   - **Task**: Implement a webhook endpoint to handle Stripe payment events. Upon successful payment, create an order in the `orders` table and corresponding entries in `order_items`.
   - **Files**:
     - `app/api/webhooks/stripe/route.ts`: Implement a webhook handler to process Stripe events.

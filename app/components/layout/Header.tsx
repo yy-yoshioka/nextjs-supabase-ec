@@ -70,6 +70,16 @@ export default function Header() {
                   マイページ
                 </Link>
                 <Link
+                  href="/orders"
+                  className={`transition-colors ${
+                    pathname === "/orders" || pathname.startsWith("/orders/")
+                      ? "text-indigo-700 font-medium"
+                      : "text-gray-600 hover:text-indigo-700"
+                  }`}
+                >
+                  注文履歴
+                </Link>
+                <Link
                   href="/cart"
                   className={`relative transition-colors ${
                     pathname === "/cart"
