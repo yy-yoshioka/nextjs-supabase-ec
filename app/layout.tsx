@@ -1,23 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import ClientProviders from "./(context)/ClientProviders";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
-import ClientProviders from "./(context)/ClientProviders";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "EC Shop - オンラインショッピング",
-  description: "高品質な商品を取り揃えたオンラインECサイト",
+  title: "EC Site",
+  description: "E-commerce site built with Next.js and Supabase",
 };
 
 export default function RootLayout({
@@ -27,13 +19,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
-      >
+      <body className={inter.className}>
         <ClientProviders>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-16">{children}</main>
+            <Footer />
+          </div>
         </ClientProviders>
       </body>
     </html>

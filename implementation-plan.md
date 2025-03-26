@@ -272,7 +272,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
 
 ## UI Components and Layout
 
-- [ ] **Step 15: Shared Layout Components**
+- [x] **Step 15: Shared Layout Components**
   - **Task**: Create common layout components for consistent navigation and branding.
   - **Files**:
     - `app/components/layout/Header.tsx`: Site header with navigation links.
