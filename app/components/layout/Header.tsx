@@ -41,9 +41,9 @@ export default function Header() {
             </Link>
             {user && user.role === "admin" && (
               <Link
-                href="/admin/products/add"
+                href="/admin/products"
                 className={`transition-colors ${
-                  pathname === "/admin/products/add"
+                  pathname.startsWith("/admin/products")
                     ? "text-indigo-700 font-medium"
                     : "text-gray-600 hover:text-indigo-700"
                 }`}

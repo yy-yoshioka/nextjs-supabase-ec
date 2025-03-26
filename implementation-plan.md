@@ -238,7 +238,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
 
 ## Admin & Additional Features
 
-- [ ] **Step 12: Admin Guard & Product Management**
+- [x] **Step 12: Admin Guard & Product Management**
   - **Task**: Implement an admin area with role-based access control, allowing admins to add, edit, and delete products.
   - **Files**:
     - `app/middleware.ts`: Implement middleware (or use an HOC) to restrict access to admin routes.

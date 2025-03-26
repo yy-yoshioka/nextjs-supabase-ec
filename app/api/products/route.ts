@@ -1,6 +1,20 @@
-import { NextResponse } from "next/server";
-import { createProduct } from "../../(lib)/supabaseDb";
+import { NextRequest, NextResponse } from "next/server";
+import { createProduct, getAllProducts } from "../../(lib)/supabaseDb";
 import { Product } from "../../(lib)/types/database";
+
+// GETリクエストのハンドラー - 全商品の取得
+export async function GET(request: NextRequest) {
+  try {
+    const products = await getAllProducts();
+    return NextResponse.json(products);
+  } catch (error) {
+    console.error("商品の取得中にエラーが発生しました:", error);
+    return NextResponse.json(
+      { error: "商品の取得に失敗しました", details: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
 
 // POSTリクエストのハンドラー - 商品の追加
 export async function POST(request: Request) {
