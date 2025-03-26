@@ -260,14 +260,13 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
   - **User Instructions**:
     - Update the Supabase schema accordingly if you opt to add a separate `user_addresses` table.
 
-- [ ] **Step 14: Polish UI & Optional Features**
+- [x] **Step 14: Polish UI & Optional Features**
   - **Task**: Improve the UI by adding pagination to the product listing, search functionality, and better error handling.
   - **Files**:
     - `app/products/page.tsx`: Implement pagination and filters.
     - Update relevant UI components in `app/components/` as needed.
   - **Step Dependencies**: Step 12, Step 13
   - **User Instructions**:
-    - Run `yarn build && yarn start` to test the final UI on production build.
 
 ---
 
