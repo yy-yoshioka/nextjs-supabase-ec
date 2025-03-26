@@ -40,7 +40,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
 
 ## Supabase Integration & Env Setup
 
-- [ ] **Step 2: Install and Configure Supabase Client**  
+- [x] **Step 2: Install and Configure Supabase Client**  
   - **Task**: Install the Supabase JavaScript client and create a module to initialize it using environment variables.
   - **Files**:
     - `package.json`: Add dependency `"@supabase/supabase-js": "^2.x.x"`.
