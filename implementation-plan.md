@@ -67,7 +67,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
       NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
       ```
 
-- [ ] **Step 3: Create Initial DB Schema in Supabase**  
+- [x] **Step 3: Create Initial DB Schema in Supabase**  
   - **Task**: Define the following tables in your Supabase database using the SQL editor or a migration file:
     - **`users`**:  
       - Columns: `id` (uuid, primary key, default generated), `email` (text, unique, not null), `role` (text, default 'user'), `created_at` (timestamp, default now).
