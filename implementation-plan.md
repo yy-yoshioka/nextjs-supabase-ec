@@ -250,7 +250,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
   - **User Instructions**:
     - In Supabase, update the `users` table to set a user's `role` to `'admin'` for testing admin features.
 
-- [ ] **Step 13: Extend User Profiles**
+- [x] **Step 13: Extend User Profiles**
   - **Task**: Enhance the user profile functionality to include additional details such as shipping addresses and phone numbers. Optionally, support multiple shipping addresses.
   - **Files**:
     - `app/profile/edit/page.tsx`: Page for editing user profile details.

@@ -16,6 +16,21 @@ export interface UserProfile {
   created_at: string;
 }
 
+export interface UserAddress {
+  id: string;
+  user_id: string;
+  name: string;
+  recipient_name: string;
+  postal_code: string | null;
+  prefecture: string | null;
+  city: string | null;
+  street_address: string;
+  building: string | null;
+  phone_number: string | null;
+  is_default: boolean;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -53,6 +68,11 @@ export type Database = {
         Row: UserProfile;
         Insert: Omit<UserProfile, "id" | "created_at">;
         Update: Partial<Omit<UserProfile, "id" | "created_at">>;
+      };
+      user_addresses: {
+        Row: UserAddress;
+        Insert: Omit<UserAddress, "id" | "created_at">;
+        Update: Partial<Omit<UserAddress, "id" | "created_at">>;
       };
       products: {
         Row: Product;
