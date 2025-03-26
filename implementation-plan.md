@@ -194,7 +194,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
   - **User Instructions**:
     - Test cart functionality by adding products from the product detail page.
 
-- [ ] **Step 9: Integrate Stripe Payment**
+- [x] **Step 9: Integrate Stripe Payment**
   - **Task**: Set up Stripe payment processing. Create a server action to initiate a Stripe Checkout Session when the user clicks "Checkout".
   - **Files**:
     - `package.json`: Add dependency `"stripe": "^x.x.x"`.

@@ -1,13 +1,70 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../(context)/CartContext";
+import { useAuth } from "../(context)/AuthProvider";
+import { loadStripe } from "@stripe/stripe-js";
+
+// Stripeのパブリックキーを設定
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, totalPrice } =
     useCart();
+  const { user } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // チェックアウト処理
+  const handleCheckout = async () => {
+    try {
+      setIsProcessing(true);
+      setError(null);
+
+      // Stripeのインスタンスを取得
+      const stripe = await stripePromise;
+      if (!stripe) throw new Error("Stripeの読み込みに失敗しました");
+
+      // チェックアウトセッションの作成APIを呼び出す
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items,
+          customerId: user?.id, // ユーザーがログインしている場合はIDを送信
+        }),
+      });
+
+      const { sessionId, error: responseError } = await response.json();
+
+      if (responseError) {
+        throw new Error(responseError);
+      }
+
+      // Stripeチェックアウトページにリダイレクト
+      const { error: redirectError } = await stripe.redirectToCheckout({
+        sessionId,
+      });
+
+      if (redirectError) {
+        throw new Error(redirectError.message);
+      }
+    } catch (err) {
+      console.error("チェックアウトエラー:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "チェックアウト中にエラーが発生しました"
+      );
+      setIsProcessing(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -159,12 +216,32 @@ export default function CartPage() {
                 ¥{totalPrice.toLocaleString()}
               </span>
             </div>
-            <Link
-              href="/checkout"
-              className="block w-full bg-indigo-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
+
+            {error && (
+              <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4">
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={handleCheckout}
+              disabled={isProcessing}
+              className="block w-full bg-indigo-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-indigo-400"
             >
-              購入手続きへ進む
-            </Link>
+              {isProcessing ? "処理中..." : "購入手続きへ進む"}
+            </button>
+
+            {!user && (
+              <p className="mt-4 text-sm text-gray-600">
+                ログインするとお届け先情報を保存できます。
+                <Link
+                  href="/auth/login"
+                  className="text-indigo-600 hover:underline"
+                >
+                  ログイン
+                </Link>
+              </p>
+            )}
           </div>
         </div>
       </div>

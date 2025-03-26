@@ -9,15 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^6.1.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.49.3",
+    "@tailwindcss/postcss": "^4",
     "autoprefixer": "^10.4.21",
     "next": "15.2.4",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "stripe": "^17.7.0",
     "tailwindcss": "^4",
-    "@tailwindcss/postcss": "^4",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
