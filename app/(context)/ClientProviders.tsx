@@ -2,7 +2,7 @@
 
 import React from "react";
 import AuthProvider from "./AuthProvider";
-// import { CartProvider } from "./CartContext";
+import { CartProvider } from "./CartContext";
 
 // クライアントサイドのプロバイダーをまとめたコンポーネント
 export default function ClientProviders({
@@ -12,9 +12,7 @@ export default function ClientProviders({
 }) {
   return (
     <AuthProvider>
-      {/* <CartProvider>{children}</CartProvider
-      > */}
-      {children}
+      <CartProvider>{children}</CartProvider>
     </AuthProvider>
   );
 }

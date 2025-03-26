@@ -183,7 +183,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
 
 ## Cart & Checkout
 
-- [ ] **Step 8: Cart Context / Local State**
+- [x] **Step 8: Cart Context / Local State**
   - **Task**: Implement cart state management using React Context to handle cart operations (add, remove, update).
   - **Files**:
     - `app/(context)/CartContext.tsx`: Create a Cart context provider.
