@@ -161,7 +161,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
 
 ## Basic UI & Product Listing
 
-- [ ] **Step 6: Create Product Model & Fetch Products**
+- [x] **Step 6: Create Product Model & Fetch Products**
   - **Task**: Implement a server action or API route in Next.js to fetch all products from Supabase and display them on a product listing page.
   - **Files**:
     - `app/(lib)/supabaseDb.ts`: Functions for product queries (e.g., `getAllProducts()`).

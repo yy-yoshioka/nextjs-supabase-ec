@@ -1,5 +1,7 @@
 import { supabase } from "./supabase";
 import { createUserProfile } from "./profiles";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Database } from "./types/database";
 
 // Type for the signup data
 export interface SignUpData {
@@ -12,6 +14,14 @@ export interface SignUpData {
 export interface SignInData {
   email: string;
   password: string;
+}
+
+// 拡張されたユーザータイプ
+export interface UserWithRole {
+  id: string;
+  email?: string;
+  role: string;
+  [key: string]: any;
 }
 
 /**
@@ -94,14 +104,21 @@ export async function signUp({ email, password, displayName }: SignUpData) {
  * Sign in an existing user with email and password
  */
 export async function signIn({ email, password }: SignInData) {
+  console.log(`Attempting to sign in user with email: ${email}`);
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
+    console.error(`Sign in error: ${JSON.stringify(error)}`);
     throw error;
   }
+
+  console.log("Sign in successful, session established");
+  console.log(`User ID: ${data.user?.id}`);
+  console.log(`Session expires at: ${data.session?.expires_at}`);
 
   return data;
 }
@@ -120,19 +137,112 @@ export async function signOut() {
 }
 
 /**
- * Get the current authenticated user
+ * Get the current authenticated user with role information
+ * この関数はサーバーコンポーネントでのみ使用可能
  */
-export async function getCurrentUser() {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export async function getCurrentUser(): Promise<UserWithRole | null> {
+  try {
+    // セッションを取得
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-  if (!session) {
+    if (sessionError) {
+      console.error("Session error:", sessionError);
+      return null;
+    }
+
+    if (!session) {
+      console.log("No active session found");
+      return null;
+    }
+
+    // ユーザー情報を取得
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError) {
+      console.error("User fetch error:", userError);
+      return null;
+    }
+
+    if (!user) {
+      console.log("No user found in session");
+      return null;
+    }
+
+    // ユーザーのロール情報を取得
+    const { data: userData, error: roleError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (roleError) {
+      console.error("Error fetching user role:", roleError);
+      // ロール情報が取得できなくても、デフォルトの'user'ロールでユーザー情報を返す
+      return {
+        ...user,
+        role: "user",
+      } as UserWithRole;
+    }
+
+    console.log("User authenticated successfully:", user.id);
+    console.log("User role:", userData?.role || "user");
+
+    // ユーザー情報とロールを合わせて返す
+    return {
+      ...user,
+      role: userData?.role || "user",
+    } as UserWithRole;
+  } catch (error) {
+    console.error("Unexpected error in getCurrentUser:", error);
     return null;
   }
+}
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+/**
+ * クライアントコンポーネントでユーザー情報を取得する
+ */
+export function useCurrentUser() {
+  const supabaseClient = createClientComponentClient<Database>();
+
+  const getUser = async (): Promise<UserWithRole | null> => {
+    try {
+      const {
+        data: { session },
+      } = await supabaseClient.auth.getSession();
+
+      if (!session) {
+        return null;
+      }
+
+      const {
+        data: { user },
+      } = await supabaseClient.auth.getUser();
+
+      if (!user) {
+        return null;
+      }
+
+      const { data: userData } = await supabaseClient
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      return {
+        ...user,
+        role: userData?.role || "user",
+      } as UserWithRole;
+    } catch (error) {
+      console.error("Error in useCurrentUser:", error);
+      return null;
+    }
+  };
+
+  return { getUser };
 }

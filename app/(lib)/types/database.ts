@@ -40,3 +40,35 @@ export interface OrderItem {
   quantity: number;
   price_at_purchase: number;
 }
+
+export type Database = {
+  public: {
+    Tables: {
+      users: {
+        Row: User;
+        Insert: Omit<User, "created_at">;
+        Update: Partial<Omit<User, "id" | "created_at">>;
+      };
+      user_profiles: {
+        Row: UserProfile;
+        Insert: Omit<UserProfile, "id" | "created_at">;
+        Update: Partial<Omit<UserProfile, "id" | "created_at">>;
+      };
+      products: {
+        Row: Product;
+        Insert: Omit<Product, "id" | "created_at">;
+        Update: Partial<Omit<Product, "id" | "created_at">>;
+      };
+      orders: {
+        Row: Order;
+        Insert: Omit<Order, "id" | "created_at">;
+        Update: Partial<Omit<Order, "id" | "created_at">>;
+      };
+      order_items: {
+        Row: OrderItem;
+        Insert: Omit<OrderItem, "id">;
+        Update: Partial<Omit<OrderItem, "id">>;
+      };
+    };
+  };
+};
