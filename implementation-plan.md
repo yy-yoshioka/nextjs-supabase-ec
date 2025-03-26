@@ -225,7 +225,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
       STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
       ```
 
-- [ ] **Step 11: Order History**
+- [x] **Step 11: Order History**
   - **Task**: Create a page for logged-in users to view their order history, including order details and status.
   - **Files**:
     - `app/orders/page.tsx`: Page that fetches and displays the user's orders (using SSR or a server action).

@@ -1,19 +1,59 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "../../(context)/CartContext";
+import { useAuth } from "../../(context)/AuthProvider";
+import { getSessionOrderId } from "../../(lib)/orderClient";
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { clearCart } = useCart();
+  const { user } = useAuth();
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // ページロード時にカートをクリア
-  useEffect(() => {
+  // カートクリア用の関数
+  const handleClearCart = useCallback(() => {
     clearCart();
   }, []);
+
+  // カートをクリア
+  useEffect(() => {
+    handleClearCart();
+  }, [handleClearCart]);
+
+  // セッション情報の取得
+  useEffect(() => {
+    async function fetchOrderDetails() {
+      if (!sessionId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { orderId: sessionOrderId, error: sessionError } =
+          await getSessionOrderId(sessionId);
+
+        if (sessionError) {
+          setError(sessionError);
+          return;
+        }
+
+        setOrderId(sessionOrderId);
+      } catch (err) {
+        console.error("注文詳細の取得に失敗しました:", err);
+        setError("注文詳細の取得に失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchOrderDetails();
+  }, [sessionId]);
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">
@@ -47,12 +87,21 @@ export default function CheckoutSuccessPage() {
         </div>
 
         <div className="flex flex-col space-y-4">
-          <Link
-            href="/orders"
-            className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
-          >
-            注文履歴を確認する
-          </Link>
+          {orderId ? (
+            <Link
+              href={`/orders/${orderId}`}
+              className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
+            >
+              注文詳細を確認する
+            </Link>
+          ) : (
+            <Link
+              href="/orders"
+              className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
+            >
+              注文履歴を確認する
+            </Link>
+          )}
           <Link
             href="/products"
             className="text-indigo-600 hover:text-indigo-800"

@@ -47,14 +47,19 @@ const verifyStripeEvent = async (
 
 // Webhook処理のメインハンドラー
 export async function POST(req: NextRequest) {
+  console.log("Stripeウェブフックを受信しました");
+
   try {
     // リクエストボディを取得
     const rawBody = await getRawBody(req);
+    console.log("リクエストボディを取得しました");
 
     // Stripeイベントを検証
     const event = await verifyStripeEvent(req, rawBody);
+    console.log("イベント検証結果:", event ? event.type : "検証失敗");
 
     if (!event) {
+      console.error("イベントの検証に失敗しました");
       return NextResponse.json(
         { error: "イベントの検証に失敗しました" },
         { status: 400 }
@@ -64,6 +69,7 @@ export async function POST(req: NextRequest) {
     // イベントタイプに応じて処理
     switch (event.type) {
       case "checkout.session.completed":
+        console.log("checkout.session.completedイベントを処理します");
         await handleCheckoutSessionCompleted(event);
         break;
 
@@ -87,7 +93,27 @@ export async function POST(req: NextRequest) {
 
 // checkout.session.completedイベントの処理
 async function handleCheckoutSessionCompleted(event: Stripe.Event) {
+  console.log("==================================================");
+  console.log("チェックアウト完了イベントの処理を開始します");
   const session = event.data.object as Stripe.Checkout.Session;
+  console.log("セッションID:", session.id);
+  console.log(
+    "セッションメタデータ:",
+    JSON.stringify(session.metadata, null, 2)
+  );
+  console.log(
+    "セッション全体:",
+    JSON.stringify(
+      {
+        id: session.id,
+        amount_total: session.amount_total,
+        customer: session.customer,
+        payment_status: session.payment_status,
+      },
+      null,
+      2
+    )
+  );
 
   // セッションのメタデータからアイテムとユーザー情報を取得
   const items = session.metadata?.items;
@@ -100,25 +126,64 @@ async function handleCheckoutSessionCompleted(event: Stripe.Event) {
 
   try {
     // メタデータからパースしたアイテム
-    const parsedItems = JSON.parse(items);
+    console.log("アイテムデータをパースします:", items);
+    let parsedItems;
+    try {
+      parsedItems = JSON.parse(items);
+      console.log("パース済みアイテム:", JSON.stringify(parsedItems, null, 2));
+    } catch (parseError) {
+      console.error("JSONのパースに失敗しました:", parseError);
+      console.error("元のJSON文字列:", items);
+      return;
+    }
+
+    // パースされたアイテムの検証
+    if (!Array.isArray(parsedItems) || parsedItems.length === 0) {
+      console.error(
+        "パースされたアイテムが配列ではないか、空です:",
+        parsedItems
+      );
+      return;
+    }
+
+    // ユーザーIDの確認
+    const finalUserId = userId || "guest";
+    console.log("注文に使用するユーザーID:", finalUserId);
 
     // 注文データを準備
     const orderData = {
-      userId: userId || "guest", // ユーザーIDがない場合はゲスト購入
+      userId: finalUserId,
       items: parsedItems,
       totalPrice: session.amount_total ? session.amount_total / 100 : 0, // Stripeは金額をセント単位で保存
       status: "completed",
     };
+    console.log("注文データ:", JSON.stringify(orderData, null, 2));
 
     // データベースに注文を作成
+    console.log("注文データをデータベースに保存します");
     const result = await createOrder(orderData);
 
     if (!result.success) {
       console.error("注文の作成に失敗しました:", result.error);
     } else {
       console.log("注文が正常に作成されました:", result.order.id);
+
+      // この注文IDをセッションに関連付けるためのメタデータを更新
+      try {
+        console.log("セッションメタデータを更新します");
+        await stripe.checkout.sessions.update(session.id, {
+          metadata: {
+            ...session.metadata,
+            orderId: result.order.id,
+          },
+        });
+        console.log("セッションメタデータを更新しました");
+      } catch (err) {
+        console.error("セッションのメタデータ更新に失敗しました:", err);
+      }
     }
   } catch (error) {
     console.error("注文処理中にエラーが発生しました:", error);
   }
+  console.log("==================================================");
 }

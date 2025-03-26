@@ -26,32 +26,74 @@ export interface OrderData {
  */
 export async function createOrder(orderData: OrderData) {
   const supabase = createServerSupabaseClient();
+  console.log("==================================================");
+  console.log(
+    "createOrder関数が呼び出されました。入力データ:",
+    typeof orderData === "string"
+      ? orderData
+      : JSON.stringify(orderData, null, 2)
+  );
 
   try {
-    // トランザクションを模倣 - 理想的にはsupabaseでのトランザクションをサポートしたい
-    // 1. まず注文を作成
+    // 入力検証
+    if (!orderData.userId) {
+      console.error("ユーザーIDが指定されていません");
+      return { error: new Error("ユーザーIDが必要です"), success: false };
+    }
+
+    if (
+      !orderData.items ||
+      !Array.isArray(orderData.items) ||
+      orderData.items.length === 0
+    ) {
+      console.error(
+        "注文アイテムが無効です:",
+        typeof orderData.items === "string"
+          ? orderData.items
+          : JSON.stringify(orderData.items, null, 2)
+      );
+      return {
+        error: new Error("有効な注文アイテムが必要です"),
+        success: false,
+      };
+    }
+
+    // 注文を作成
+    const orderInsertData = {
+      user_id: orderData.userId,
+      total_price: orderData.totalPrice,
+      status: orderData.status || "processing",
+    };
+    console.log(
+      "注文データをデータベースに挿入します:",
+      JSON.stringify(orderInsertData, null, 2)
+    );
+
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .insert({
-        user_id: orderData.userId,
-        total_price: orderData.totalPrice,
-        status: orderData.status || "processing",
-      })
+      .insert(orderInsertData)
       .select()
       .single();
 
     if (orderError) {
       console.error("注文の作成に失敗しました:", orderError);
-      throw orderError;
+      return { error: orderError, success: false };
     }
 
-    // 2. 次に、注文アイテムを作成
+    console.log("注文が作成されました:", order);
+
+    // 注文アイテムを作成
     const orderItems = orderData.items.map((item) => ({
       order_id: order.id,
       product_id: item.id,
       quantity: item.quantity,
       price_at_purchase: item.price,
     }));
+
+    console.log(
+      "注文アイテムを作成します:",
+      JSON.stringify(orderItems, null, 2)
+    );
 
     const { error: itemsError } = await supabase
       .from("order_items")
@@ -60,13 +102,16 @@ export async function createOrder(orderData: OrderData) {
     if (itemsError) {
       console.error("注文アイテムの作成に失敗しました:", itemsError);
       // 注文アイテムの作成に失敗した場合は、注文自体も削除（ロールバック）
+      console.log("注文をロールバックします:", order.id);
       await supabase.from("orders").delete().eq("id", order.id);
-      throw itemsError;
+      return { error: itemsError, success: false };
     }
 
+    console.log("注文と注文アイテムが正常に作成されました");
+    console.log("==================================================");
     return { order, success: true };
   } catch (error) {
-    console.error("注文処理中にエラーが発生しました:", error);
+    console.error("注文処理中に予期しないエラーが発生しました:", error);
     return { error, success: false };
   }
 }

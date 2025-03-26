@@ -3,19 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../(context)/AuthProvider";
-import { createClient } from "@supabase/supabase-js";
-import { Database } from "../(lib)/types/database";
-import { Order, OrderItem, Product } from "../(lib)/types/database";
-
-// 拡張された注文アイテムの型定義
-interface OrderItemWithProduct extends OrderItem {
-  product?: Product;
-}
-
-// 拡張された注文の型定義
-interface OrderWithItems extends Order {
-  order_items: OrderItemWithProduct[];
-}
+import { getUserOrders, OrderWithItems } from "../(lib)/orderClient";
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -31,53 +19,16 @@ export default function OrdersPage() {
       }
 
       try {
-        // Supabaseクライアントを作成
-        const supabase = createClient<Database>(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        const { orders: ordersData, error: ordersError } = await getUserOrders(
+          user.id
         );
 
-        // ユーザーの注文を取得
-        const { data: ordersData, error: ordersError } = await supabase
-          .from("orders")
-          .select(
-            `
-            *,
-            order_items(*)
-          `
-          )
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
+        if (ordersError) {
+          setError(ordersError);
+          return;
+        }
 
-        if (ordersError) throw ordersError;
-
-        // 注文内の商品情報を取得
-        const ordersWithProducts = await Promise.all(
-          ordersData.map(async (order) => {
-            const orderItemsWithProducts = await Promise.all(
-              order.order_items.map(async (item: OrderItem) => {
-                // 商品情報を取得
-                const { data: productData } = await supabase
-                  .from("products")
-                  .select("*")
-                  .eq("id", item.product_id)
-                  .single();
-
-                return {
-                  ...item,
-                  product: productData,
-                };
-              })
-            );
-
-            return {
-              ...order,
-              order_items: orderItemsWithProducts,
-            };
-          })
-        );
-
-        setOrders(ordersWithProducts);
+        setOrders(ordersData);
       } catch (err) {
         console.error("注文履歴の取得に失敗しました:", err);
         setError("注文履歴の読み込み中にエラーが発生しました");
@@ -87,7 +38,7 @@ export default function OrdersPage() {
     }
 
     fetchOrders();
-  }, [user]);
+  }, [user?.id]);
 
   // ステータスに応じたバッジのクラス
   const getStatusBadgeClass = (status: string) => {
@@ -173,7 +124,12 @@ export default function OrdersPage() {
                 <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
                   <div>
                     <h2 className="text-lg font-semibold">
-                      注文番号: {order.id.substring(0, 8)}...
+                      <Link
+                        href={`/orders/${order.id}`}
+                        className="hover:text-indigo-600"
+                      >
+                        注文番号: {order.id.substring(0, 8)}...
+                      </Link>
                     </h2>
                     <p className="text-gray-500 text-sm">
                       {new Date(order.created_at).toLocaleString("ja-JP")}
@@ -239,6 +195,14 @@ export default function OrdersPage() {
                     <span className="text-lg font-bold text-indigo-600">
                       ¥{order.total_price.toLocaleString()}
                     </span>
+                  </div>
+                  <div className="mt-4 text-right">
+                    <Link
+                      href={`/orders/${order.id}`}
+                      className="inline-block text-indigo-600 hover:text-indigo-800 font-medium"
+                    >
+                      詳細を見る
+                    </Link>
                   </div>
                 </div>
               </div>

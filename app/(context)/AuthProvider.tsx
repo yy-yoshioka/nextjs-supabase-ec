@@ -32,7 +32,6 @@ export default function AuthProvider({
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      console.log(session);
       if (!session) {
         setUser(null);
         return;
@@ -68,7 +67,9 @@ export default function AuthProvider({
 
   // 初回マウント時とセッション変更時にユーザー情報を取得
   useEffect(() => {
-    refreshUser();
+    if (!user) {
+      refreshUser();
+    }
 
     // セッションの変更を監視
     const {
@@ -80,7 +81,7 @@ export default function AuthProvider({
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [user?.id]);
 
   // コンテキスト値の作成
   const value = {
