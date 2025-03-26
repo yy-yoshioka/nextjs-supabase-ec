@@ -170,7 +170,7 @@ Build a fully functional e-commerce application using Next.js 15, Supabase (for 
   - **User Instructions**:
     - Populate the `products` table with sample data via the Supabase dashboard or a script.
 
-- [ ] **Step 7: Product Detail Page**
+- [x] **Step 7: Product Detail Page**
   - **Task**: Create a product detail page to show detailed product information and include an "Add to Cart" button.
   - **Files**:
     - `app/products/[id]/page.tsx`: Product detail page using SSR or SSG.
