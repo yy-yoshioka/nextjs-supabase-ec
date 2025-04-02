@@ -10,12 +10,15 @@
     "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/webhooks/stripe"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@stripe/stripe-js": "^6.1.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.49.3",
     "@tailwindcss/postcss": "^4",
     "autoprefixer": "^10.4.21",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.484.0",
     "next": "15.2.4",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
